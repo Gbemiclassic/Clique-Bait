@@ -23,6 +23,28 @@ In this case study - you are required to support the founder and CEO Danny’s v
 <p align="center" style="margin-bottom: 0px !important;">
 <img width="825" alt="image" src="https://github.com/Gbemiclassic/Clique-Bait/blob/main/Images/Entity%20Relationship%20Diagram.png">
 
+##Available Data
+
+**Users**
+
+<img width="366" alt="image" src="https://github.com/Gbemiclassic/Clique-Bait/blob/main/Images/users.jpg">
+
+**Events**
+
+<img width="849" alt="image" src="https://github.com/Gbemiclassic/Clique-Bait/blob/main/Images/events.jpg">
+
+**Event_identifier**
+
+<img width="273" alt="image" src="https://github.com/Gbemiclassic/Clique-Bait/blob/main/Images/event_i.jpg">
+
+**Page_hierarchy**
+
+<img width="576" alt="image" src="https://github.com/Gbemiclassic/Clique-Bait/blob/main/Images/page_h.jpg">
+
+**Campaign_identifier**
+
+<img width="792" alt="image" src="https://github.com/Gbemiclassic/Clique-Bait/blob/main/Images/camp.jpg">
+
 ***
 
 ## Case Study Solution

@@ -2,7 +2,7 @@
 
 /* 1. How many users are there? */
 
-SELECT COUNT(DISTINCT user_id)
+SELECT COUNT(DISTINCT user_id) user_count
 FROM users;
 
 -- There are 500 users
@@ -13,16 +13,15 @@ SELECT
 	ROUND(COUNT(DISTINCT cookie_id) / COUNT(DISTINCT user_id), 0) Avg_cookies_per_user
 FROM users;
 
--- There are 4 cookies per user on the average.
+-- Approximately 4 cookies per user on the average.
 
 /* 3. What is the unique number of visits by all users per month? */
 
 SELECT 
 	 MONTH(event_time) month
-	,COUNT(DISTINCT visit_id)
+	,COUNT(DISTINCT visit_id) unique_user_visits
 FROM events
-GROUP BY 1
-ORDER BY 1;
+GROUP BY 1;
 
 
 
@@ -30,10 +29,9 @@ ORDER BY 1;
 
 SELECT 
 	 event_type
-	,COUNT(*)
+	,COUNT(*) number_of_events
 FROM events
-GROUP BY 1
-ORDER BY 1;
+GROUP BY 1;
 
 /* 5. What is the percentage of visits which have a purchase event? */
 
@@ -63,7 +61,7 @@ FROM events
 
 SELECT
 	 p.page_name
-     ,COUNT(visit_id)
+     ,COUNT(visit_id) views
 FROM events e
 	LEFT JOIN page_hierarchy p 
 		ON e.page_id = p.page_id
@@ -119,7 +117,7 @@ How many times was each product purchased?
 Additionally, create another table which further aggregates the data for the above points but this time for each product category instead of individual products.
 */
 
-CREATE TABLE product_details AS
+-- CREATE TABLE product_details AS
 SELECT
 	 page_name product_name
 	,product_category
@@ -127,6 +125,7 @@ SELECT
 	,COUNT(CASE WHEN event_type = 2 THEN visit_id ELSE NULL END) cart_adds
 	,COUNT(CASE WHEN event_type = 2 AND visit_id NOT IN (SELECT visit_id FROM events WHERE event_type = 3) THEN visit_id ELSE NULL END) abandoned
 	,COUNT(CASE WHEN event_type = 2 AND visit_id IN (SELECT DISTINCT visit_id FROM events WHERE event_type = 3) THEN visit_id ELSE NULL END) purchases
+
 FROM events e
 	LEFT JOIN page_hierarchy p
 		ON e.page_id = p.page_id
@@ -145,16 +144,36 @@ FROM product_details
 GROUP BY 1
 ;
 
+SELECT * FROM product_details ;
+
 -- Use your 2 new output tables - answer the following questions:
 
 -- 1. Which product had the most views, cart adds and purchases?
--- 2. Which product was most likely to be abandoned?
 
-SELECT *
-FROM product_details;
-
+SELECT product_name, views
+FROM product_details
+ORDER BY 2 DESC
+LIMIT 1;
 -- Oyster has the most views.
--- Lobster has the most cart adds and purchases.
+
+SELECT product_name, cart_adds
+FROM product_details
+ORDER BY 2 DESC
+LIMIT 1;
+-- Lobster has the most cart adds 
+
+SELECT product_name, purchases
+FROM product_details
+ORDER BY 2 DESC
+LIMIT 1;
+-- Lobster has the mostpurchases.
+
+-- 2. Which product was most likely to be abandoned?
+SELECT product_name, abandoned
+FROM product_details
+ORDER BY 2 DESC
+LIMIT 1;
+
 -- Russian Caviar is most likely to be abandoned.
 
 
@@ -172,10 +191,16 @@ LIMIT 1;
 
 SELECT
 	 CONCAT(ROUND(100 * SUM(cart_adds)/SUM(views), 2), '%') view_to_cart_conv_rt
-    ,CONCAT(ROUND(100 * SUM(purchases)/SUM(cart_adds), 2), '%') cart_to_purchases_conv_rt
 FROM product_details;
 
--- Average views to cart adds rate is 60.95% and average cart adds to purchases rate is 75.93%.
+-- Average views to cart adds rate is 60.95% 
+-- What is the average conversion rate from cart add to purchase?
+
+SELECT
+    CONCAT(ROUND(100 * SUM(purchases)/SUM(cart_adds), 2), '%') cart_to_purchases_conv_rt
+FROM product_details;
+
+-- Average cart adds to purchases rate is 75.93%.
 -- Although the cart add rate is lower, but the conversion of potential customer to the sales funnel is at least 15% higher.
 
 -- 3. Campaigns Analysis
@@ -183,20 +208,20 @@ FROM product_details;
 SELECT 
 	 user_id
 	,e.visit_id
-	,MIN(e.event_time) AS visit_start_time
-	,SUM(CASE WHEN e.event_type = 1 THEN 1 ELSE 0 END) AS page_views
-	,SUM(CASE WHEN e.event_type = 2 THEN 1 ELSE 0 END) AS cart_adds
-	,SUM(CASE WHEN e.event_type = 3 THEN 1 ELSE 0 END) AS purchase
+	,MIN(e.event_time) visit_start_time
+	,SUM(CASE WHEN e.event_type = 1 THEN 1 ELSE 0 END) page_views
+	,SUM(CASE WHEN e.event_type = 2 THEN 1 ELSE 0 END) cart_adds
+	,SUM(CASE WHEN e.event_type = 3 THEN 1 ELSE 0 END) purchase
 	,campaign_name
-	,SUM(CASE WHEN e.event_type = 4 THEN 1 ELSE 0 END) AS impression 
-	,SUM(CASE WHEN e.event_type = 5 THEN 1 ELSE 0 END) AS click 
+	,SUM(CASE WHEN e.event_type = 4 THEN 1 ELSE 0 END) impression 
+	,SUM(CASE WHEN e.event_type = 5 THEN 1 ELSE 0 END) click 
 	,GROUP_CONCAT(CASE 
 					WHEN p.product_id IS NOT NULL 
                     AND e.event_type = 2 -- for products added to cart only
                     THEN p.page_name ELSE NULL 
                     END 
 					ORDER BY e.sequence_number SEPARATOR ', '
-				) AS cart_products
+				) cart_products
 FROM events e
 	INNER JOIN users u
 		ON e.cookie_id = u.cookie_id
