@@ -23,7 +23,7 @@ In this case study - you are required to support the founder and CEO Danny’s v
 <p align="center" style="margin-bottom: 0px !important;">
 <img width="825" alt="image" src="https://github.com/Gbemiclassic/Clique-Bait/blob/main/Images/Entity%20Relationship%20Diagram.png">
 
-##Available Data
+## Available Data
 
 **Users**
 
